@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار مؤتمت</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #4caf50;
+        }
+
+        .designer {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            animation: color-change 2s infinite;
+        }
+
+        @keyframes color-change {
+            0% { color: #4caf50; }
+            25% { color: #f44336; }
+            50% { color: #2196f3; }
+            75% { color: #ff9800; }
+            100% { color: #4caf50; }
+        }
+
+        .start-button {
+            padding: 10px 20px;
+            font-size: 1.2em;
+            color: #fff;
+            background-color: #4caf50;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .start-button:hover {
+            background-color: #45a049;
+        }
+
+        .question {
+            margin-bottom: 20px;
+        }
+
+        .options label {
+            display: block;
+            margin: 10px 0;
+        }
+
+        .button {
+            padding: 10px 20px;
+            color: #fff;
+            background-color: #4caf50;
+            border: none;
+            border-radius: 4px;
+            font-size: 1em;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .button.show {
+            opacity: 1;
+        }
+
+        .button:hover {
+            background-color: #45a049;
+        }
+
+        .timer {
+            font-size: 1.2em;
+            color: #ff5722;
+            margin-bottom: 20px;
+        }
+
+        .progress {
+            margin: 10px 0;
+            font-size: 1em;
+        }
+
+        #result {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="designer">المصمم Mo2xo</div>
+        <button class="start-button" onclick="startQuiz()">ابدأ الاختبار</button>
+        <div id="quiz" style="display: none;">
+            <div class="progress">السؤال <span id="question-number">1</span> من <span id="total-questions">0</span></div>
+            <div id="question-container">
+                <div class="question"></div>
+                <div class="options"></div>
+            </div>
+            <div class="timer">الوقت المتبقي: <span id="timer">120</span> ثانية</div>
+        </div>
+        <button id="next-button" class="button">السؤال التالي</button>
+        <div id="result">
+            <h2>نتائج الاختبار</h2>
+            <p>الإجابات الصحيحة: <span id="correct-answers"></span></p>
+            <p>الإجابات الخاطئة: <span id="wrong-answers"></span></p>
+            <button class="button" onclick="restartQuiz()">إعادة الاختبار</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "من هو أفضل مدرس بالتاريخ للرياضيات؟",
+                options: ["أستاذ هادي", "هادي عبد الحي", "1 و 2 معا", "كل ما سبق صحيح"],
+                correct: 3
+            },
+            {
+                question: "النقطة الواقعة على محور الفواصل والمتساوية البعد عن النقطتين A و B:",
+                options: ["A(-3,2,0)", "B(-3,3,0)", "C(3,0,0)", "D(-3,0,0)"],
+                correct: 3
+            },
+            {
+                question: "المعادلة العامة للخط المستقيم المار عبر نقطتين:",
+                options: ["A(x + y = 0)", "B(x - y = 1)", "C(y = mx + c)", "D(2x + 3y = 5)"],
+                correct: 2
+            },
+            {
+                question: "حساب نقطة المنتصف بين نقطتين:",
+                options: ["A(2,3)", "B(-1,4)", "C(0,0)", "D(5,5)"],
+                correct: 0
+            }
+            // أكمل بقية الأسئلة هنا
+        ];
+
+        let currentQuestionIndex = 0;
+        let correctAnswers = 0;
+        let wrongAnswers = 0;
+        let timer;
+        let timeLeft = 120;
+
+        const questionContainer = document.querySelector(".question");
+        const optionsContainer = document.querySelector(".options");
+        const timerDisplay = document.getElementById("timer");
+        const nextButton = document.getElementById("next-button");
+        const resultContainer = document.getElementById("result");
+
+        document.getElementById("total-questions").textContent = questions.length;
+
+        function startQuiz() {
+            document.querySelector(".start-button").style.display = "none";
+            document.querySelector(".designer").style.display = "none";
+            document.getElementById("quiz").style.display = "block";
+            showQuestion();
+        }
+
+        function showQuestion() {
+            clearInterval(timer);
+            timeLeft = 120;
+            timerDisplay.textContent = timeLeft;
+
+            document.getElementById("question-number").textContent = currentQuestionIndex + 1;
+
+            const currentQuestion = questions[currentQuestionIndex];
+            questionContainer.textContent = currentQuestion.question;
+            optionsContainer.innerHTML = "";
+
+            currentQuestion.options.forEach((option, index) => {
+                const label = document.createElement("label");
+                const input = document.createElement("input");
+                input.type = "radio";
+                input.name = "option";
+                input.value = index;
+                input.addEventListener("change", () => {
+                    nextButton.classList.add("show");
+                });
+                label.appendChild(input);
+                label.appendChild(document.createTextNode(option));
+                optionsContainer.appendChild(label);
+            });
+
+            timer = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = timeLeft;
+
+                if (timeLeft === 0) {
+                    alert("لقد انتهى الوقت لهذا السؤال!");
+                    checkAnswer();
+                }
+            }, 1000);
+        }
+
+        function checkAnswer() {
+            clearInterval(timer);
+            const selectedOption = document.querySelector('input[name="option"]:checked');
+
+            if (selectedOption && parseInt(selectedOption.value) === questions[currentQuestionIndex].correct) {
+                correctAnswers++;
+            } else {
+                wrongAnswers++;
+            }
+
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex < questions.length) {
+                nextButton.classList.remove("show");
+                showQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            document.getElementById("quiz").style.display = "none";
+            resultContainer.style.display = "block";
+            document.getElementById("correct-answers").textContent = correctAnswers;
+            document.getElementById("wrong-answers").textContent = wrongAnswers;
+        }
+
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            correctAnswers = 0;
+            wrongAnswers = 0;
+            resultContainer.style.display = "none";
+            document.getElementById("quiz").style.display = "block";
+            showQuestion();
+        }
+
+        nextButton.addEventListener("click", () => {
+            checkAnswer();
+            nextButton.classList.remove("show");
+        });
+
+        showQuestion();
+    </script>
+</body>
+</html>
